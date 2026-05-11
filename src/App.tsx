@@ -1,14 +1,11 @@
-import { useMemo, useState } from 'react'
-import { KIT_ITEMS, NOTES_MAX_LENGTH } from './data/items'
+import { useState } from 'react'
+import { ALL_KIT_ITEMS, KIT_CATEGORIES, NOTES_MAX_LENGTH } from './data/items'
 
 export default function App() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set())
   const [notes, setNotes] = useState('')
 
-  const selectedLabels = useMemo(
-    () => KIT_ITEMS.filter((item) => selectedIds.has(item.id)).map((item) => item.label),
-    [selectedIds]
-  )
+  const n = selectedIds.size
 
   function toggle(id: string) {
     setSelectedIds((prev) => {
@@ -20,7 +17,7 @@ export default function App() {
   }
 
   function selectAll() {
-    setSelectedIds(new Set(KIT_ITEMS.map((i) => i.id)))
+    setSelectedIds(new Set(ALL_KIT_ITEMS.map((i) => i.id)))
   }
 
   function clearSelection() {
@@ -33,36 +30,61 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <h1>First aid kit</h1>
-        <p className="lede">Select any items that apply. Add optional notes below.</p>
+        <p className="lede">
+          Open a category, tap items to select. Notes at the bottom —{' '}
+          <span className="lede-count">{n} selected</span>.
+        </p>
       </header>
 
-      <div className="toolbar">
-        <button type="button" className="btn btn-text" onClick={selectAll}>
-          Select all
-        </button>
-        <button type="button" className="btn btn-text" onClick={clearSelection}>
-          Clear
-        </button>
+      <div className="toolbar-sticky">
+        <div className="toolbar">
+          <button type="button" className="btn btn-text" onClick={selectAll}>
+            All
+          </button>
+          <button type="button" className="btn btn-text" onClick={clearSelection}>
+            Clear
+          </button>
+          <span className="selection-count" aria-live="polite">
+            {n} selected
+          </span>
+        </div>
       </div>
 
-      <ul className="item-list" aria-label="Kit items">
-        {KIT_ITEMS.map((item) => {
-          const checked = selectedIds.has(item.id)
-          return (
-            <li key={item.id}>
-              <label className={`item-row ${checked ? 'item-row--selected' : ''}`}>
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => toggle(item.id)}
-                  className="item-check"
-                />
-                <span className="item-name">{item.label}</span>
-              </label>
-            </li>
-          )
-        })}
-      </ul>
+      <div className="categories" role="region" aria-label="Kit categories">
+        {KIT_CATEGORIES.map((category, index) => (
+          <details
+            key={category.id}
+            className="category-panel"
+            open={index === 0}
+          >
+            <summary className="category-summary">
+              <span className="category-caret" aria-hidden="true">
+                ›
+              </span>
+              <span className="category-title">{category.title}</span>
+              <span className="category-meta">{category.items.length} items</span>
+            </summary>
+            <ul className="item-list" aria-label={category.title}>
+              {category.items.map((item) => {
+                const checked = selectedIds.has(item.id)
+                return (
+                  <li key={item.id}>
+                    <label className={`item-row ${checked ? 'item-row--selected' : ''}`}>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => toggle(item.id)}
+                        className="item-check"
+                      />
+                      <span className="item-name">{item.label}</span>
+                    </label>
+                  </li>
+                )
+              })}
+            </ul>
+          </details>
+        ))}
+      </div>
 
       <div className="notes-block">
         <label htmlFor="other-notes" className="notes-label">
@@ -82,25 +104,12 @@ export default function App() {
           autoComplete="off"
         />
         <p className="notes-counter" aria-live="polite">
-          {notes.length} / {NOTES_MAX_LENGTH} characters
+          {notes.length} / {NOTES_MAX_LENGTH}
           {notesRemaining <= 10 && notesRemaining >= 0 ? (
             <span className="notes-warning"> ({notesRemaining} left)</span>
           ) : null}
         </p>
       </div>
-
-      <section className="summary" aria-live="polite" aria-label="Selected items summary">
-        <h2>Selected ({selectedLabels.length})</h2>
-        {selectedLabels.length === 0 ? (
-          <p className="summary-empty">No items selected.</p>
-        ) : (
-          <ol className="summary-list">
-            {selectedLabels.map((label) => (
-              <li key={label}>{label}</li>
-            ))}
-          </ol>
-        )}
-      </section>
     </div>
   )
 }

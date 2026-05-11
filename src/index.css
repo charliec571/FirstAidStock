@@ -1,22 +1,32 @@
+/*
+  Sweetwater blue page background; white surfaces for contrast.
+  Category palette otherwise matches digital brand blues.
+*/
 :root {
-  --text: #3d4f5c;
-  --text-muted: #5c6d78;
-  --text-h: #0f1b24;
-  --bg: #f6f9f8;
+  --sw-blue: #2e71ea;
+  --sw-blue-deep: #1f57d6;
+  --text: #223747;
+  --text-muted: #727785;
+  --text-h: #101828;
+  --bg: var(--sw-blue);
   --surface: #ffffff;
-  --border: #d5e0dc;
-  --accent: #0d7a6e;
-  --accent-hover: #0a6359;
-  --accent-soft: rgba(13, 122, 110, 0.12);
-  --warn: #b45309;
-  --radius: 12px;
-  --shadow: 0 4px 24px rgba(15, 27, 36, 0.08);
+  --border: #e2e8f0;
+  --accent: var(--sw-blue);
+  --accent-hover: var(--sw-blue-deep);
+  --accent-soft: rgba(46, 113, 234, 0.14);
+  --sticky-bg: rgba(255, 255, 255, 0.97);
+  --on-blue: #ffffff;
+  --on-blue-muted: rgba(255, 255, 255, 0.88);
+  --warn: #fbbf24;
+  --radius: 10px;
+  --shadow: 0 4px 20px rgba(0, 20, 60, 0.2);
+  --sticky-pad-x: 20px;
 
-  --sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --sans: Helvetica, Arial, sans-serif;
 
   font-family: var(--sans);
   font-size: 17px;
-  line-height: 1.5;
+  line-height: 1.45;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
@@ -26,17 +36,19 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #c5d0d4;
-    --text-muted: #8fa3ab;
-    --text-h: #eef5f3;
-    --bg: #0f1618;
-    --surface: #1a2428;
-    --border: #2f3d42;
-    --accent: #3dd4c3;
-    --accent-hover: #5fe0d2;
-    --accent-soft: rgba(61, 212, 195, 0.15);
-    --warn: #fbbf24;
-    --shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+    --sw-blue: #1e4fc4;
+    --sw-blue-deep: #163d9e;
+    --text: #e8ecf4;
+    --text-muted: #a8b0c4;
+    --text-h: #f7f8fc;
+    --surface: #152032;
+    --border: #2a3a56;
+    --accent: #6ea8ff;
+    --accent-hover: #9ec4ff;
+    --accent-soft: rgba(110, 168, 255, 0.18);
+    --sticky-bg: rgba(21, 32, 50, 0.96);
+    --warn: #fcd34d;
+    --shadow: 0 6px 28px rgba(0, 0, 0, 0.45);
   }
 }
 
@@ -54,22 +66,15 @@ body {
   min-height: 100svh;
   max-width: 640px;
   margin: 0 auto;
-  padding: 0 20px 48px;
+  padding: 0 var(--sticky-pad-x) max(16px, env(safe-area-inset-bottom));
 }
 
 h1 {
   font-size: 1.65rem;
-  font-weight: 600;
-  color: var(--text-h);
-  margin: 0 0 8px;
-  letter-spacing: -0.02em;
-}
-
-h2 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-h);
-  margin: 0 0 10px;
+  font-weight: 700;
+  color: var(--on-blue);
+  margin: 0 0 6px;
+  letter-spacing: -0.03em;
 }
 
 p {
@@ -77,20 +82,50 @@ p {
 }
 
 .app-header {
-  padding: 24px 0 8px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 16px;
+  padding: 20px 0 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+  margin-bottom: 0;
 }
 
 .lede {
-  color: var(--text-muted);
-  font-size: 0.98rem;
+  color: var(--on-blue-muted);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.lede-count {
+  color: var(--warn);
+  font-weight: 700;
+}
+
+.toolbar-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  margin: 0 calc(-1 * var(--sticky-pad-x));
+  padding: 10px var(--sticky-pad-x);
+  padding-top: max(10px, env(safe-area-inset-top));
+  background: var(--sticky-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .toolbar {
   display: flex;
-  gap: 8px;
-  margin-bottom: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}
+
+.selection-count {
+  margin-left: auto;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-h);
+  white-space: nowrap;
 }
 
 .btn-text {
@@ -99,31 +134,108 @@ p {
   color: var(--accent);
   font-weight: 600;
   cursor: pointer;
-  padding: 8px 12px;
+  padding: 6px 10px;
   font-size: 0.95rem;
+  border-radius: 8px;
 }
 
 .btn-text:hover {
-  text-decoration: underline;
+  background: var(--accent-soft);
+}
+
+.btn-text:active {
+  opacity: 0.9;
+}
+
+/* Categories accordion */
+.categories {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.category-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.category-panel[open] {
+  box-shadow: var(--shadow), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+}
+
+.category-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-h);
+  list-style: none;
+  user-select: none;
+}
+
+.category-summary::-webkit-details-marker {
+  display: none;
+}
+
+.category-caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  font-size: 1.15rem;
+  line-height: 1;
+  color: var(--accent);
+  transform: rotate(0deg);
+  transition: transform 0.2s ease;
+}
+
+.category-panel[open] .category-caret {
+  transform: rotate(90deg);
+}
+
+.category-title {
+  flex: 1;
+  text-align: left;
+}
+
+.category-meta {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.category-panel .item-list {
+  margin: 0;
+  padding: 0 10px 12px;
+  gap: 6px;
 }
 
 .item-list {
   list-style: none;
-  margin: 0 0 24px;
-  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .item-row {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
-  padding: 14px 16px;
-  background: var(--surface);
+  gap: 12px;
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--surface) 96%, var(--border));
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: calc(var(--radius) - 2px);
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
@@ -138,7 +250,7 @@ p {
 }
 
 .item-check {
-  margin-top: 3px;
+  margin-top: 2px;
   width: 20px;
   height: 20px;
   flex-shrink: 0;
@@ -154,21 +266,27 @@ p {
 }
 
 .notes-block {
-  margin-bottom: 28px;
+  padding: 16px;
+  margin-bottom: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
 }
 
 .notes-label {
   display: block;
   font-weight: 600;
   color: var(--text-h);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
+  font-size: 0.95rem;
 }
 
 .notes-field {
   width: 100%;
-  min-height: 88px;
-  padding: 12px 14px;
-  border-radius: var(--radius);
+  min-height: 80px;
+  padding: 10px 12px;
+  border-radius: 10px;
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text-h);
@@ -184,8 +302,8 @@ p {
 }
 
 .notes-counter {
-  margin-top: 8px;
-  font-size: 0.88rem;
+  margin-top: 6px;
+  font-size: 0.82rem;
   color: var(--text-muted);
 }
 
@@ -194,25 +312,77 @@ p {
   font-weight: 600;
 }
 
-.summary {
-  padding: 20px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-}
+@media (max-width: 480px) {
+  :root {
+    font-size: 16px;
+    --sticky-pad-x: 16px;
+    --radius: 10px;
+  }
 
-.summary-empty {
-  color: var(--text-muted);
-  font-size: 0.95rem;
-}
+  h1 {
+    font-size: 1.35rem;
+  }
 
-.summary-list {
-  margin: 0;
-  padding-left: 1.25rem;
-  color: var(--text-h);
-}
+  .app-header {
+    padding: 16px 0 12px;
+  }
 
-.summary-list li {
-  margin-bottom: 6px;
+  .lede {
+    font-size: 0.88rem;
+  }
+
+  .toolbar-sticky {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }
+
+  .btn-text {
+    padding: 6px 8px;
+    font-size: 0.9rem;
+  }
+
+  .selection-count {
+    font-size: 0.82rem;
+  }
+
+  .categories {
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .category-summary {
+    padding: 12px 14px;
+    font-size: 0.95rem;
+  }
+
+  .category-meta {
+    font-size: 0.72rem;
+  }
+
+  .item-row {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .item-name {
+    font-weight: 500;
+    font-size: 0.94rem;
+    line-height: 1.35;
+  }
+
+  .item-check {
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+  }
+
+  .notes-field {
+    min-height: 72px;
+    font-size: 16px;
+  }
+
+  .notes-block {
+    padding: 14px;
+  }
 }

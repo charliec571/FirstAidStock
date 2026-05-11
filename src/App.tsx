@@ -1,12 +1,18 @@
 import { useMemo, useState } from 'react'
 import { ALL_KIT_ITEMS, KIT_CATEGORIES, NOTES_MAX_LENGTH } from './data/items'
+import { submitToFormspree } from './lib/formspreeSubmit'
+import { buildRestockEmailContent, buildRestockMailtoUrl } from './lib/restockMailto'
 import { useBoxFromQuery } from './hooks/useBoxFromQuery'
-import { buildRestockMailtoUrl } from './lib/restockMailto'
+
+type SubmitStatus = 'idle' | 'loading' | 'success' | 'error'
 
 export default function App() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set())
   const [notes, setNotes] = useState('')
   const boxName = useBoxFromQuery()
+
+  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>('idle')
+  const [submitMessage, setSubmitMessage] = useState<string | null>(null)
 
   const n = selectedIds.size
 
@@ -32,28 +38,62 @@ export default function App() {
     setSelectedIds(new Set())
   }
 
-  function submitRequest() {
+  async function submitRequest() {
     if (selectedLabels.length === 0 && !notes.trim()) {
       const ok = window.confirm(
-        'No items are selected and notes are empty. Open email anyway?'
+        'No items are selected and notes are empty. Send anyway?'
       )
       if (!ok) return
     }
 
-    const url = buildRestockMailtoUrl({
-      boxName: boxName || 'Unknown box',
+    const box = boxName || 'Unknown box'
+    const { subject, message } = buildRestockEmailContent({
+      boxName: box,
       selectedLabels,
       notes,
-      to: import.meta.env.VITE_RESTOCK_MAIL_TO,
     })
 
-    window.location.href = url
+    const formId = import.meta.env.VITE_FORMSPREE_FORM_ID?.trim()
+
+    if (!formId) {
+      window.location.href = buildRestockMailtoUrl({
+        boxName: box,
+        selectedLabels,
+        notes,
+        to: import.meta.env.VITE_RESTOCK_MAIL_TO,
+      })
+      return
+    }
+
+    setSubmitStatus('loading')
+    setSubmitMessage(null)
+
+    const result = await submitToFormspree({
+      formId,
+      subject,
+      message,
+      replyEmail: import.meta.env.VITE_FORMSPREE_REPLY_EMAIL,
+    })
+
+    if (result.ok) {
+      setSubmitStatus('success')
+      setSubmitMessage('Request sent. Check the inbox configured in Formspree.')
+      window.setTimeout(() => {
+        setSubmitStatus('idle')
+        setSubmitMessage(null)
+      }, 6000)
+    } else {
+      setSubmitStatus('error')
+      setSubmitMessage(result.error)
+    }
   }
 
   const notesRemaining = NOTES_MAX_LENGTH - notes.length
 
   const boxDisplay =
     boxName || 'Box name will appear here after QR scan'
+
+  const submitBusy = submitStatus === 'loading'
 
   return (
     <div className="app">
@@ -101,14 +141,25 @@ export default function App() {
         </div>
       </div>
 
+      {submitMessage ? (
+        <p
+          className={`submit-feedback submit-feedback--${submitStatus === 'error' ? 'error' : 'success'}`}
+          role="status"
+        >
+          {submitMessage}
+        </p>
+      ) : null}
+
       <div className="submit-actions submit-actions--top">
         <button
           type="button"
           className="btn btn-submit"
-          onClick={submitRequest}
-          aria-label="Submit restock request — opens email"
+          onClick={() => void submitRequest()}
+          disabled={submitBusy}
+          aria-busy={submitBusy}
+          aria-label="Submit restock request"
         >
-          Submit
+          {submitBusy ? 'Sending…' : 'Submit'}
         </button>
       </div>
 
@@ -177,10 +228,12 @@ export default function App() {
         <button
           type="button"
           className="btn btn-submit"
-          onClick={submitRequest}
-          aria-label="Submit restock request — opens email"
+          onClick={() => void submitRequest()}
+          disabled={submitBusy}
+          aria-busy={submitBusy}
+          aria-label="Submit restock request"
         >
-          Submit
+          {submitBusy ? 'Sending…' : 'Submit'}
         </button>
       </div>
     </div>

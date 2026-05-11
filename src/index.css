@@ -258,6 +258,44 @@ p {
   outline-offset: 3px;
 }
 
+.btn-submit:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.submit-feedback {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.submit-feedback--success {
+  background: rgba(16, 185, 129, 0.2);
+  color: #065f46;
+  border: 1px solid rgba(16, 185, 129, 0.45);
+}
+
+.submit-feedback--error {
+  background: rgba(239, 68, 68, 0.15);
+  color: #991b1b;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+@media (prefers-color-scheme: dark) {
+  .submit-feedback--success {
+    color: #a7f3d0;
+    background: rgba(16, 185, 129, 0.15);
+  }
+
+  .submit-feedback--error {
+    color: #fecaca;
+    background: rgba(239, 68, 68, 0.12);
+  }
+}
+
 /* Categories accordion */
 .categories {
   display: flex;

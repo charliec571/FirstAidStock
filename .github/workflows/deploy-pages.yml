@@ -28,6 +28,9 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Build
+        env:
+          # Optional: repo secret → default recipient on Submit (mailto To: field)
+          VITE_RESTOCK_MAIL_TO: ${{ secrets.VITE_RESTOCK_MAIL_TO }}
         run: npm run build -- --base=/${{ github.event.repository.name }}/
       # configure-pages omitted: it calls the Pages API and 404s until Pages is enabled in repo Settings.
       - uses: actions/upload-pages-artifact@v3

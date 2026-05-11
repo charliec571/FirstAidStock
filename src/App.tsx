@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ALL_KIT_ITEMS, KIT_CATEGORIES, NOTES_MAX_LENGTH } from './data/items'
 import { useBoxFromQuery } from './hooks/useBoxFromQuery'
+import { buildRestockMailtoUrl } from './lib/restockMailto'
 
 export default function App() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set())
@@ -8,6 +9,11 @@ export default function App() {
   const boxName = useBoxFromQuery()
 
   const n = selectedIds.size
+
+  const selectedLabels = useMemo(
+    () => ALL_KIT_ITEMS.filter((i) => selectedIds.has(i.id)).map((i) => i.label),
+    [selectedIds]
+  )
 
   function toggle(id: string) {
     setSelectedIds((prev) => {
@@ -24,6 +30,24 @@ export default function App() {
 
   function clearSelection() {
     setSelectedIds(new Set())
+  }
+
+  function submitRequest() {
+    if (selectedLabels.length === 0 && !notes.trim()) {
+      const ok = window.confirm(
+        'No items are selected and notes are empty. Open email anyway?'
+      )
+      if (!ok) return
+    }
+
+    const url = buildRestockMailtoUrl({
+      boxName: boxName || 'Unknown box',
+      selectedLabels,
+      notes,
+      to: import.meta.env.VITE_RESTOCK_MAIL_TO,
+    })
+
+    window.location.href = url
   }
 
   const notesRemaining = NOTES_MAX_LENGTH - notes.length
@@ -75,6 +99,17 @@ export default function App() {
             {n} selected
           </span>
         </div>
+      </div>
+
+      <div className="submit-actions submit-actions--top">
+        <button
+          type="button"
+          className="btn btn-submit"
+          onClick={submitRequest}
+          aria-label="Submit restock request — opens email"
+        >
+          Submit
+        </button>
       </div>
 
       <div className="categories" role="region" aria-label="Kit categories">
@@ -136,6 +171,17 @@ export default function App() {
             <span className="notes-warning"> ({notesRemaining} left)</span>
           ) : null}
         </p>
+      </div>
+
+      <div className="submit-actions submit-actions--bottom">
+        <button
+          type="button"
+          className="btn btn-submit"
+          onClick={submitRequest}
+          aria-label="Submit restock request — opens email"
+        >
+          Submit
+        </button>
       </div>
     </div>
   )

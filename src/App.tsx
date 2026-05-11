@@ -52,8 +52,8 @@ export default function App() {
             className="header-logo"
             src={`${import.meta.env.BASE_URL}sweetwater-logo.svg`}
             alt="Sweetwater"
-            width={200}
-            height={44}
+            width={160}
+            height={36}
             decoding="async"
           />
         </div>

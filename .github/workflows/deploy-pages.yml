@@ -29,7 +29,7 @@ jobs:
       - run: npm ci
       - name: Build
         run: npm run build -- --base=/${{ github.event.repository.name }}/
-      - uses: actions/configure-pages@v5
+      # configure-pages omitted: it calls the Pages API and 404s until Pages is enabled in repo Settings.
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

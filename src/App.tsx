@@ -38,6 +38,20 @@ export default function App() {
     setSelectedIds(new Set())
   }
 
+  const formspreeConfigured = Boolean(
+    import.meta.env.VITE_FORMSPREE_FORM_ID?.trim()
+  )
+
+  function openMailDraft() {
+    const box = boxName || 'Unknown box'
+    window.location.href = buildRestockMailtoUrl({
+      boxName: box,
+      selectedLabels,
+      notes,
+      to: import.meta.env.VITE_RESTOCK_MAIL_TO,
+    })
+  }
+
   async function submitRequest() {
     if (selectedLabels.length === 0 && !notes.trim()) {
       const ok = window.confirm(
@@ -56,12 +70,10 @@ export default function App() {
     const formId = import.meta.env.VITE_FORMSPREE_FORM_ID?.trim()
 
     if (!formId) {
-      window.location.href = buildRestockMailtoUrl({
-        boxName: box,
-        selectedLabels,
-        notes,
-        to: import.meta.env.VITE_RESTOCK_MAIL_TO,
-      })
+      setSubmitStatus('error')
+      setSubmitMessage(
+        'Silent send isn’t enabled on this build: the GitHub Actions secret VITE_FORMSPREE_FORM_ID is missing or the site wasn’t rebuilt after adding it. Add the secret (your Formspree id from …/f/xxxx), redeploy GitHub Pages, then try Submit again. For local testing, use .env.local — see .env.example.'
+      )
       return
     }
 
@@ -141,6 +153,16 @@ export default function App() {
         </div>
       </div>
 
+      {!formspreeConfigured ? (
+        <div className="config-banner" role="note">
+          <strong>Formspree not wired to this deploy.</strong> Add GitHub secret{' '}
+          <code className="config-banner__code">VITE_FORMSPREE_FORM_ID</code>, then rerun the
+          Pages workflow so Submit can send without opening Mail. Optionally add{' '}
+          <code className="config-banner__code">VITE_RESTOCK_MAIL_TO</code> if you use “Draft in
+          Mail” and want a default To address.
+        </div>
+      ) : null}
+
       {submitMessage ? (
         <p
           className={`submit-feedback submit-feedback--${submitStatus === 'error' ? 'error' : 'success'}`}
@@ -162,6 +184,14 @@ export default function App() {
           {submitBusy ? 'Sending…' : 'Submit'}
         </button>
       </div>
+
+      {!formspreeConfigured ? (
+        <div className="mailto-fallback">
+          <button type="button" className="btn btn-mail-draft" onClick={openMailDraft}>
+            Draft in Mail instead
+          </button>
+        </div>
+      ) : null}
 
       <div className="categories" role="region" aria-label="Kit categories">
         {KIT_CATEGORIES.map((category, index) => (
@@ -236,6 +266,14 @@ export default function App() {
           {submitBusy ? 'Sending…' : 'Submit'}
         </button>
       </div>
+
+      {!formspreeConfigured ? (
+        <div className="mailto-fallback mailto-fallback--bottom">
+          <button type="button" className="btn btn-mail-draft" onClick={openMailDraft}>
+            Draft in Mail instead
+          </button>
+        </div>
+      ) : null}
     </div>
   )
 }

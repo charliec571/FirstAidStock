@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { ALL_KIT_ITEMS, KIT_CATEGORIES, NOTES_MAX_LENGTH } from './data/items'
+import { useBoxFromQuery } from './hooks/useBoxFromQuery'
 
 export default function App() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set())
   const [notes, setNotes] = useState('')
+  const boxName = useBoxFromQuery()
 
   const n = selectedIds.size
 
@@ -26,10 +28,35 @@ export default function App() {
 
   const notesRemaining = NOTES_MAX_LENGTH - notes.length
 
+  const boxDisplay =
+    boxName || 'Box name will appear here after QR scan'
+
   return (
     <div className="app">
+      <div className="status-banner" role="region" aria-label="Station status">
+        <span className="status-banner__badge">All clear</span>
+        <span className="status-banner__sep" aria-hidden="true">
+          ·
+        </span>
+        <span
+          className={`status-banner__box ${boxName ? '' : 'status-banner__box--placeholder'}`}
+        >
+          {boxDisplay}
+        </span>
+      </div>
+
       <header className="app-header">
-        <h1>First aid kit</h1>
+        <div className="app-header__hero">
+          <h1>First Aid Kit Restock</h1>
+          <img
+            className="header-logo"
+            src={`${import.meta.env.BASE_URL}sweetwater-logo.svg`}
+            alt="Sweetwater"
+            width={200}
+            height={44}
+            decoding="async"
+          />
+        </div>
         <p className="lede">
           Open a category, tap items to select. Notes at the bottom —{' '}
           <span className="lede-count">{n} selected</span>.
